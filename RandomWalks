@@ -1,0 +1,122 @@
+//Eric Tosoonyan
+//Random Walks Project
+//This project produces random walks and sorts them.
+
+#define _USE_MATH_DEFINES
+#include <iostream>
+#include <iomanip>
+#include <random>
+#include <algorithm>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <math.h>
+
+using namespace std;
+
+class Walk {
+private:
+	double x, y, distance;
+public:
+	Walk() : x(0), y(0), distance(0) {};
+
+	bool comparator(const Walk& lhs, const Walk& rhs) {
+		return lhs.distance < rhs.distance;
+	}
+
+	double getX() const { return x; }
+	double getY() const { return y; }
+	double getDistance() const { return distance; }
+
+	int genereateAngle() {
+		return rand() % 359 + 1;
+	}
+	int generateLength() {
+		return rand() % 100 + 1;
+	}
+	double convertToRadians(double degree) {
+		return (degree * M_PI) / 180;
+	}
+
+	void walkAgain() {
+		int angle = genereateAngle();
+		int length = generateLength();
+		double radians = convertToRadians(angle);   //static_cast converts data types
+
+		x += length * cos(radians);
+		y += length * sin(radians);
+		distance += length;
+	}
+
+	friend ostream& operator<<(ostream& os, const Walk& w) {
+		os << "Final Position: (" << w.x << ", " << w.y << ") Distance: " << w.distance;
+	}
+};
+
+int main() {
+
+	int numWalks, numPoints;
+
+	cout << "*** Random Walks ***" << endl << endl;
+	cout << "This program generates a number of random walks." << endl << endl;
+	cout << "Enter number of points for each walk: ";
+	cin >> numPoints;
+	cout << endl;
+	cout << "Enter number of random walks to generate: ";
+	cin >> numWalks;
+	cout << endl;
+
+	int x = 0;
+	int y = 0;
+
+	srand(static_cast<unsigned int>(time(nullptr)));
+
+	vector<Walk> walks;
+
+	for (int i = 1; i <= numWalks; ++i) {
+		cout << "Walk/Step: " << i << "/" << 1 << ":  Point: ";
+		Walk walk;
+		walk.walkAgain();
+		cout << fixed << setprecision(2) << walk.getX() << ", " << walk.getY() << "  Distance: " << walk.getDistance() << endl;
+
+		for (int j = 2; j <= numPoints; ++j) {
+			cout << "Walk/Step: " << i << "/" << j << ":  Point: ";
+			walk.walkAgain();
+			cout << fixed << setprecision(2) << walk.getX() << ", " << walk.getY() << "  Distance: " << walk.getDistance() << endl;
+
+			if (j % numPoints == 0) {
+				cout << endl;
+			}
+		}
+		walks.push_back(walk);
+	}
+
+
+	cout << "\nWalks Sorted:" << endl;
+
+	sort(walks.begin(), walks.end(), [](const Walk& lhs, const Walk& rhs) {
+		return lhs.getDistance() < rhs.getDistance();
+		});
+
+	for (int i = 0; i < numWalks; i++) {
+		cout << '\t' << "Point: " << fixed << setprecision(2) << walks[i].getX() << ", " << walks[i].getY() << " Distance: " << walks[i].getDistance();
+		cout << endl;
+	}
+
+	cout << "\nAverage Distance: ";
+
+	double totalDistance = 0.0;
+	for (const Walk& walk : walks) {
+		totalDistance += walk.getDistance();
+	}
+
+	double averageDistance = totalDistance / numWalks;
+	cout << fixed << setprecision(2) << averageDistance << endl;
+
+	cout << "\nShortest Distance/Walk: " << walks[0].getDistance() << endl;
+	cout << "Median Distance/Walk: " << walks[numWalks / 2].getDistance() << endl;
+	cout << "Longest Distance/Walk: " << walks[numWalks - 1].getDistance() << endl;
+
+
+	return 0;
+}
